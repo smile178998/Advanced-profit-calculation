@@ -1,0 +1,56 @@
+import json
+
+def input_float(prompt):
+    while True:
+        try:
+            return float(input(prompt))
+        except ValueError:
+            print("请输入有效的数字！")
+
+def calculate_profit(products, tax_rate, exchange_rate):
+    total_revenue = sum(p['price'] * p['quantity'] for p in products)
+    total_cost = sum((p['cost'] + p['shipping_fee'] + p['platform_fee']) * p['quantity'] for p in products)
+    gross_profit = total_revenue - total_cost
+    tax = gross_profit * tax_rate / 100
+    net_profit = gross_profit - tax
+    net_profit_converted = net_profit * exchange_rate
+    return total_revenue, total_cost, gross_profit, tax, net_profit, net_profit_converted
+
+def main():
+    products = []
+    print("=== 利润计算工具 ===")
+    while True:
+        name = input("产品名称 (输入 'done' 结束): ")
+        if name.lower() == 'done':
+            break
+        cost = input_float("成本 (每单位): ")
+        price = input_float("售价 (每单位): ")
+        quantity = int(input_float("数量: "))
+        shipping_fee = input_float("运费 (每单位): ")
+        platform_fee = input_float("平台手续费 (每单位): ")
+        products.append({"name": name, "cost": cost, "price": price, "quantity": quantity,
+                         "shipping_fee": shipping_fee, "platform_fee": platform_fee})
+    
+    tax_rate = input_float("请输入税率 (%): ")
+    exchange_rate = input_float("请输入汇率 (例如 1 表示无转换): ")
+    
+    total_revenue, total_cost, gross_profit, tax, net_profit, net_profit_converted = calculate_profit(products, tax_rate, exchange_rate)
+    
+    print("\n=== 计算结果 ===")
+    print(f"总收入: {total_revenue:.2f}")
+    print(f"总成本: {total_cost:.2f}")
+    print(f"毛利润: {gross_profit:.2f}")
+    print(f"税费: {tax:.2f}")
+    print(f"净利润: {net_profit:.2f}")
+    print(f"折算后净利润: {net_profit_converted:.2f}")
+    
+    save_data = input("是否保存结果到文件？(y/n): ")
+    if save_data.lower() == 'y':
+        with open("profit_report.json", "w", encoding="utf-8") as file:
+            json.dump({"total_revenue": total_revenue, "total_cost": total_cost,
+                       "gross_profit": gross_profit, "tax": tax,
+                       "net_profit": net_profit, "net_profit_converted": net_profit_converted}, file, indent=4)
+        print("结果已保存到 profit_report.json")
+    
+if __name__ == "__main__":
+    main()
